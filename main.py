@@ -9,43 +9,40 @@ vid = cv.VideoCapture(0)
 while (True):
     # scan frame from video
     bull, frame = vid.read()
-    w = int (vid.get(cv.CAP_PROP_FRAME_WIDTH))
-    h = int (vid.get(cv.CAP_PROP_FRAME_HEIGHT))
-    img = np.zeros((h,w,3), np.uint8)
-    hsvframe = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    #w = int (vid.get(cv.CAP_PROP_FRAME_WIDTH))
+    #h = int (vid.get(cv.CAP_PROP_FRAME_HEIGHT))
+    #img = np.zeros((h,w,3), np.uint8)
 
-    # operations on frame
-    # blur
-    blu = cv.bilateralFilter(frame, 9, 75, 75)  # blur
+
+    # OPERATIONS ON FRAME
+
+    hsvframe = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    cv.blur(frame, (10,10))#blur
 
     # thresholding
     # masks frame to seprate the wanted color
     lower_color = np.array([90, 80, 80])
     upper_color = np.array([150, 255, 255])
-    hsvdst = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-    mask = cv.inRange(hsvframe, lower_color, upper_color)
-    # apply mask
-    res = cv.bitwise_and(frame, frame, mask=mask)
-    # blur image for better color detection
-
-    blur = cv.bilateralFilter(frame, 12, 100, 100)
-
-    result = res
-    # find edge
     thresholdlow = 100
     thresholdmax = 300
-    edge = cv.Canny(res, thresholdlow, thresholdlow, 3)
-    edges = cv.bitwise_and(res, res, mask=edge)
-    grayframe = cv.cvtColor(edges, cv.COLOR_BGR2GRAY)
-    #find contour
+    extra_frame = frame
+    extra_edge = cv.Canny(extra_frame, thresholdlow, thresholdlow, 10)
+    hsvextra = cv.cvtColor(extra_frame, cv.COLOR_BGR2HSV)
+    mask = cv.inRange(hsvextra, lower_color, upper_color)
+    mask2 = cv.inRange(hsvframe, lower_color, upper_color)
+
+    # apply mask
+    extra_limit =cv.bitwise_and(extra_frame,extra_frame, mask=mask2)
+    res = cv.bitwise_and(extra_limit, frame, mask=mask)
+    result = res
+    # find contour
+    cv.bilateralFilter(frame, 12, 100, 100)#blur to edge
+    grayframe = cv.cvtColor(result, cv.COLOR_BGR2GRAY)
     ret, thresh = cv.threshold(grayframe, 100, 255, cv.THRESH_BINARY)
     contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     #differ bitween big and small contour
     list =[]
     for cnt in contours:
-        perimeter = cv.arcLength(cnt, True)
-        if perimeter ==  True :
-
             area = cv.contourArea(cnt)
             list.append(area)
             print(len(contours))
@@ -56,7 +53,7 @@ while (True):
             if len(list) == len(contours):
                 max_area = max(list)
                 if  area == max_area :
-                    cv.drawContours(result, contours=contours, contourIdx=-1, color=(255,0, 0), thickness=1, lineType=cv.LINE_AA)
+                    cv.drawContours(result, contours=contours, contourIdx=-1, color=(0,0,255), thickness=1, lineType=cv.LINE_AA)
                     print("ya mom")
 
 
@@ -72,7 +69,8 @@ while (True):
     print(cordinates)
     '''
     # results
-    cv.imshow("img",img)
+    #cv.imshow("img",img)
+    cv.imshow("extra",extra_limit)
     cv.imshow("frame", frame)
     #cv.imshow("edges", edges)
     cv.imshow("result", result)
