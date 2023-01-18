@@ -39,13 +39,12 @@ while (True):
     grayframe = cv.cvtColor(result, cv.COLOR_BGR2GRAY)
     ret, thresh = cv.threshold(grayframe, 100, 255, cv.THRESH_BINARY)
     contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
+    cv.drawContours(result, contours=contours, contourIdx=-1, color=(0, 0, 255), thickness=1, lineType=cv.LINE_AA)
     #find triangle
     for cnt in contours:
-        approx = cv.approxPolyDP(cnt, 0.1 * cv.arcLength(cnt, True), True)
+        approx = cv.approxPolyDP(cnt, 1, True)
         if len(approx) == 3:
             triangle = cv.drawContours(result, [cnt], -1, (0, 255, 255), 3)
-
             # compute the center of mass of the triangle
             M = cv.moments(cnt)
             if M['m00'] != 0.0:
