@@ -43,7 +43,8 @@ while (True):
     #differ bitween big and small contour
     list =[]
     for cnt in contours:
-        if
+        perimeter = cv.arcLength(cnt, True)
+        if perimeter ==  True :
 
             area = cv.contourArea(cnt)
             list.append(area)
